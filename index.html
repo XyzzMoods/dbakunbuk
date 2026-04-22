@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nestro Exchange</title>
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-glass: rgba(17, 17, 17, 0.8);
+            --accent-green: #00ff88;
+            --accent-orange: #ff9500;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --success: #00ff88;
+            --warning: #ff9500;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo img {
+    width: 26px;
+    height: 26px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* TEXT + VERIFIED */
+.logo-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px; /* jarak rapat */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: white;
+}
+
+/* VERIFIED */
+.logo-text .verified i {
+    color: #1d9bf0;
+    font-size: 13px;
+}
+        .logo i {
+            font-size: 1.5rem;
+            color: var(--accent-green);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 220px;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 25px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 400;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            font-size: 14px;
+        }
+
+        .control-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        /* CHART */
+        .chart-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #tradingview_chart {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* BOTTOM CONTROLS */
+        .bottom-controls {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-glass);
+            padding: 14px 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .pair-btn {
+            padding: 10px 18px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 22px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            backdrop-filter: blur(20px);
+            letter-spacing: -0.3px;
+        }
+
+        .pair-btn:hover,
+        .pair-btn.active {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        /* MODAL */
+        .pair-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            width: 92%;
+            max-width: 500px;
+            max-height: 85%;
+            overflow-y: auto;
+            backdrop-filter: blur(30px);
+        }
+
+        .modal-header {
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--accent-green);
+            letter-spacing: -0.5px;
+        }
+
+        .close-modal {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glass);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .close-modal:hover {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+            background: rgba(255, 149, 0, 0.1);
+        }
+
+        .pairs-grid {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .grid-pair {
+            padding: 20px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .grid-pair:hover {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.08);
+        }
+
+        .grid-pair.active {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .grid-pair-symbol {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .grid-pair-change {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .change-up { color: var(--accent-green); }
+        .change-down { color: var(--accent-orange); }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .search-box {
+                width: 160px;
+            }
+
+            .bottom-controls {
+                padding: 12px 16px;
+                overflow-x: auto;
+                padding-bottom: 20px;
+            }
+
+            .pairs-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-box {
+                width: 130px;
+            }
+
+            .logo {
+                font-size: 1.15rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+        
+        .founder {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+}
+
+.intro-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 24px;
+    color: #00ff88;
+    margin-bottom: 15px;
+}
+
+/* INTRO FULL BLACK */
+.intro {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+/* GLASS EFFECT (tanpa card) */
+.intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.03);
+}
+
+/* CONTENT */
+.intro-content {
+    position: relative;
+    text-align: center;
+    animation: fadeUp 1.2s ease;
+}
+
+.intro-logo img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 18px;
+
+    /* clean glass look */
+    border: 2px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+}
+
+.intro-logo h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    color: #00ff88;
+}
+
+/* DESC */
+.intro-desc {
+    margin-top: 15px;
+    color: #aaa;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* BUTTON */
+.intro-btn {
+    margin-top: 30px;
+    padding: 12px 30px;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+
+.intro-btn:hover {
+    border-color: #00ff88;
+    color: #00ff88;
+    background: rgba(0,255,136,0.1);
+}
+
+/* ANIMATION */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* EXIT */
+.intro.hide {
+    animation: fadeOut 0.8s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.verified i {
+    color: #1d9bf0; /* biru verified */
+    font-size: 15px;
+    margin-left: 1px;
+    vertical-align: middle;
+}
+
+/* Smooth transition ke app */
+.app-container {
+    display: none;
+}
+
+.story-wrapper {
+    text-align: center;
+}
+
+/* RING */
+.story-ring {
+    width: 110px;
+    height: 110px;
+    padding: 3px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    transition: 0.3s;
+}
+
+/* IMAGE */
+.story-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* JIKA ADA STORY (HIJAU) */
+.story-wrapper.has-story .story-ring {
+    background: conic-gradient(#00ff88, #00ff88);
+}
+
+/* hover effect */
+.story-wrapper:hover .story-ring {
+    transform: scale(1.05);
+}
+
+.app-container.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* EXIT ANIMATION */
+.intro.hide {
+    animation: introOut 1s forwards;
+}
+
+@keyframes introOut {
+    to {
+        opacity: 0;
+        transform: scale(1.1);
+        visibility: hidden;
+    }
+}
+    </style>
+</head>
+<body>
+
+<div class="intro" id="intro">  <div class="intro-content">  
+
+    <div class="intro-logo">  
+        <img src="https://cdn.jsdelivr.net/gh/IkyyEzzXD/IkyyGantengPoll@main/uploads/1776764081073_82907_file_1627.jpg" alt="logo">  
+        <h1>  
+Nestro Exchange   
+<span class="verified">  
+    <i class="fas fa-check-circle"></i>  
+</span>
+
+</h1>  
+        </div>  <p class="intro-desc">  
+        Advanced Global Market Chart Platform<br>  
+        Crypto • Forex • Gold — Real-Time Data  
+    </p>  
+
+    <button class="intro-btn" id="enterApp">  
+         Confirmation  
+    </button>  
+
+</div>
+
+</div>
+
+<div class="intro" id="intro2" style="display:none;">
+
+    <div class="intro-content">
+
+        <h1 class="intro-title">About Nestro Exchange</h1>
+
+        <p class="intro-desc">
+            Nestro Exchange adalah platform chart market global berbasis teknologi modern
+            yang dirancang untuk memberikan pengalaman analisis trading yang cepat, akurat,
+            dan profesional.
+            <br><br>
+            Dengan dukungan data real-time dari berbagai market seperti Cryptocurrency,
+            Forex, dan Commodities (Gold), Nestro Exchange memungkinkan pengguna untuk
+            memantau pergerakan harga global secara langsung tanpa delay.
+            <br><br>
+            Interface yang minimalis, responsif, dan berbasis glass UI memberikan kenyamanan
+            visual serta efisiensi dalam membaca chart, sehingga cocok digunakan oleh
+            trader pemula hingga profesional.
+            <br><br>
+            Platform ini dikembangkan dengan fokus pada kecepatan, stabilitas, dan
+            pengalaman pengguna kelas premium yang menyerupai aplikasi trading modern.
+        </p>
+
+        <div class="founder">
+            Kaii Nathan's
+            <span class="verified">
+                <i class="fas fa-check-circle"></i>
+            </span>
+        </div>
+
+        <button class="intro-btn" id="goToApp">
+            Enter Platform
+        </button>
+
+    </div>
+
+</div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+    <img src="https://cdn.jsdelivr.net/gh/IkyyEzzXD/IkyyGantengPoll@main/uploads/1776764081073_82907_file_1627.jpg" alt="logo">
+    
+    <span class="logo-text">
+        Nestro
+        <span class="verified">
+            <i class="fas fa-check-circle"></i>
+        </span>
+    </span>
+</div>
+            <div class="header-controls">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Cari pair..." id="searchInput">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <button class="control-btn" id="pairModalBtn" title="Pilih Pair">
+                    <i class="fas fa-coins"></i>
+                </button>
+                <button class="control-btn" id="fullscreenBtn" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- CHART -->
+        <div class="chart-container">
+            <div id="tradingview_chart"></div>
+        </div>
+
+        <!-- BOTTOM CONTROLS -->
+        <div class="bottom-controls" id="quickPairs"></div>
+    </div>
+
+    <!-- PAIR MODAL -->
+    <div class="pair-modal" id="pairModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Trading Pairs</div>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pairs-grid" id="modalPairs"></div>
+        </div>
+    </div>
+
+    <script>
+        let tvWidget = null;
+        let currentSymbol = 'BINANCE:BTCUSDT';
+
+        const cryptoPairs = [
+            { symbol: 'BINANCE:BTCUSDT', name: 'BTC/USDT', change: '+2.34%' },
+            { symbol: 'BINANCE:ETHUSDT', name: 'ETH/USDT', change: '-1.23%' },
+            { symbol: 'BINANCE:BNBUSDT', name: 'BNB/USDT', change: '+5.67%' },
+            { symbol: 'BINANCE:SOLUSDT', name: 'SOL/USDT', change: '+8.12%' },
+            { symbol: 'BINANCE:ADAUSDT', name: 'ADA/USDT', change: '-0.45%' },
+            { symbol: 'BINANCE:XRPUSDT', name: 'XRP/USDT', change: '+3.89%' },
+            { symbol: 'BINANCE:AVAXUSDT', name: 'AVAX/USDT', change: '+12.34%' },
+            { symbol: 'BINANCE:MATICUSDT', name: 'MATIC/USDT', change: '-2.11%' },
+            { symbol: 'BINANCE:DOGEUSDT', name: 'DOGE/USDT', change: '+15.67%' },
+            { symbol: 'BINANCE:LINKUSDT', name: 'LINK/USDT', change: '+4.56%' },
+            { symbol: 'BINANCE:DOTUSDT', name: 'DOT/USDT', change: '-3.22%' },
+            { symbol: 'BINANCE:UNIUSDT', name: 'UNI/USDT', change: '+1.78%' },
+            { symbol: 'BINANCE:LTCUSDT', name: 'LTC/USDT', change: '+0.89%' },
+            { symbol: 'BINANCE:AAVEUSDT', name: 'AAVE/USDT', change: '-4.56%' },
+            { symbol: 'BINANCE:ALGOUSDT', name: 'ALGO/USDT', change: '+6.78%' },
+            { symbol: 'BINANCE:ATOMUSDT', name: 'ATOM/USDT', change: '-1.34%' },
+            { symbol: 'BINANCE:VETUSDT', name: 'VET/USDT', change: '+9.01%' },
+            { symbol: 'BINANCE:TRXUSDT', name: 'TRX/USDT', change: '+2.45%' },
+            { symbol: 'BINANCE:XLMUSDT', name: 'XLM/USDT', change: '-0.67%' },
+            { symbol: 'BINANCE:THETAUSDT', name: 'THETA/USDT', change: '+7.23%' }
+        ];
+
+        function initChart() {
+    tvWidget = new TradingView.widget({
+        symbol: currentSymbol,
+        interval: '5',
+        timezone: 'Asia/Jakarta',
+        theme: 'dark',
+        style: '1',
+        locale: 'id',
+        container_id: "tradingview_chart",
+        width: "100%",
+        height: "100%"
+    });
+}
+
+        function updateChart(symbol) {
+    currentSymbol = symbol;
+
+    document.getElementById('tradingview_chart').innerHTML = "";
+
+    tvWidget = new TradingView.widget({
+        symbol: symbol,
+        interval: '5',
+        timezone: 'Asia/Jakarta',
+        theme: 'dark',
+        style: '1',
+        locale: 'id',
+        container_id: "tradingview_chart",
+        width: "100%",
+        height: "100%"
+    });
+}
+
+        function createQuickPairs() {
+            const container = document.getElementById('quickPairs');
+            const quickPairs = cryptoPairs.slice(0, 10);
+            
+            quickPairs.forEach((pair) => {
+                const btn = document.createElement('button');
+                btn.className = 'pair-btn';
+                btn.innerHTML = pair.name;
+                btn.onclick = () => {
+                    document.querySelectorAll('.pair-btn, .grid-pair').forEach(el => el.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateChart(pair.symbol);
+                };
+                container.appendChild(btn);
+            });
+            container.children[0]?.classList.add('active');
+        }
+
+        function createModalPairs() {
+            const container = document.getElementById('modalPairs');
+            cryptoPairs.forEach(pair => {
+                const div = document.createElement('div');
+                div.className = 'grid-pair';
+                div.innerHTML = `
+                    <div class="grid-pair-symbol">${pair.name}</div>
+                    <div class="grid-pair-change ${pair.change.startsWith('+') ? 'change-up' : 'change-down'}">${pair.change}</div>
+                `;
+                div.onclick = () => {
+                    document.querySelectorAll('.pair-btn, .grid-pair').forEach(el => el.classList.remove('active'));
+                    div.classList.add('active');
+                    updateChart(pair.symbol);
+                    closeModal();
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function openModal() { document.getElementById('pairModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('pairModal').style.display = 'none'; }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.grid-pair').forEach(pair => {
+                const symbol = pair.querySelector('.grid-pair-symbol').textContent.toLowerCase();
+                pair.style.display = symbol.includes(query) ? 'block' : 'none';
+            });
+        });
+
+        document.getElementById('pairModalBtn').onclick = openModal;
+        document.getElementById('closeModal').onclick = closeModal;
+        document.getElementById('pairModal').onclick = e => e.target.id === 'pairModal' && closeModal();
+
+        document.getElementById('fullscreenBtn').onclick = function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                this.innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        };
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+            if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                document.getElementById('fullscreenBtn').click();
+            }
+            if (e.key === '/') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
+
+const intro1 = document.getElementById('intro');
+const intro2 = document.getElementById('intro2');
+const app = document.querySelector('.app-container');
+
+// dari intro 1 ke intro 2
+document.getElementById('enterApp').onclick = () => {
+    intro1.classList.add('hide');
+
+    setTimeout(() => {
+        intro1.style.display = 'none';
+        intro2.style.display = 'flex';
+    }, 500);
+};
+
+// dari intro 2 ke chart
+document.getElementById('goToApp').onclick = () => {
+    intro2.classList.add('hide');
+
+    setTimeout(() => {
+        intro2.style.display = 'none';
+        app.style.display = 'flex';
+    }, 500);
+};
+
+        function updatePrices() {
+            cryptoPairs.forEach(pair => {
+                const change = (Math.random() - 0.5) * 20;
+                pair.change = (change > 0 ? '+' : '') + change.toFixed(2) + '%';
+                const pairEl = document.querySelector(`[onclick*="${pair.symbol}"] .grid-pair-change`);
+                if (pairEl) {
+                    pairEl.textContent = pair.change;
+                    pairEl.className = `grid-pair-change ${change > 0 ? 'change-up' : 'change-down'}`;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initChart, 100);
+            createQuickPairs();
+            createModalPairs();
+            setInterval(updatePrices, 3000);
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+                    const btn = document.getElementById('fullscreenBtn');
+            btn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
+        });
+    </script>
+</body>
+</html>
